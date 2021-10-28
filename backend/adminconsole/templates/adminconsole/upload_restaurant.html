@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	{% load static %}
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+	<meta http-equiv="x-ua-compatible" content="ie=edge" />
+	<title>Upload Restaurant
+	</title>
+	<!-- MDB icon -->
+	<link rel="icon" href="img/mdb-favicon.ico" type="image/x-icon" />
+	<!-- Font Awesome -->
+	<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.11.2/css/all.css" />
+	<!-- Google Fonts Roboto -->
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" />
+	<!-- MDB CSS-->
+	<link rel="stylesheet" href="{% static 'adminconsole/css/mdb/mdb.min.css' %}" />
+	<!-- Custom styles -->
+	<link rel="stylesheet" href="{% static 'adminconsole/css/mdb/mdb.min.css' %}" />
+	<link rel="stylesheet" href="{% static 'adminconsole/css/food.css' %}">
+
+</head>
+
+<body>
+	<!-- Navbar -->
+	<nav class="navbar navbar-expand-lg navbar-light bg-light">
+		<!-- Container wrapper -->
+		<div class="container">
+			<!-- Toggle button -->
+			<button class="navbar-toggler" type="button" data-mdb-toggle="collapse"
+				data-mdb-target="#navbarButtonsExample" aria-controls="navbarButtonsExample" aria-expanded="false"
+				aria-label="Toggle navigation">
+				<i class="fas fa-bars"></i>
+			</button>
+
+			<!-- Collapsible wrapper -->
+			<div class="collapse navbar-collapse" id="navbarButtonsExample">
+				<!-- Left links -->
+				<ul class="navbar-nav me-auto mb-2 mb-lg-0">
+					<li class="nav-item">
+						<a class="nav-link" href="/admin_home"><i class="fas fa-arrow-left"></i></a>
+					</li>
+				</ul>
+				<!-- Left links -->
+
+				<div class="d-flex align-items-center">
+                    <a href="/logout" class="btn btn-danger px-3 me-2">Logout</a>
+				</div>
+			</div>
+			<!-- Collapsible wrapper -->
+		</div>
+		<!-- Container wrapper -->
+	</nav>
+	<div class="App">
+		<header class="App-Header">
+			<img src="{% static 'adminconsole/media/food_court_logo.png' %}" class="App-logo" />
+			<h3>Add a new Restaurant</h3>
+		</header>
+		<form class="form-horizontal" method="POST" action="/add_restaurant">
+			{% csrf_token %}
+			<div class="form-group row">
+				<label class="control-label col-sm-2" for="restaurant_name">Restaurant Name:</label>
+				<div class="col-sm-10">
+					<input type="text" class="form-control" id="restaurant_name" placeholder="Restaurant Name"
+						name="restaurant_name">
+				</div>
+			</div>
+			<br />
+			<div class="form-group row">
+				<label class="control-label col-sm-2" for="restaurant_url">Website URL:</label>
+				<div class="col-sm-10">
+					<input type="text" class="form-control" id="restaurant_url" placeholder="Restaurant Website URL"
+						name="restaurant_url">
+				</div>
+			</div>
+			<br />
+			<div class="form-group row">
+				<label class="control-label col-sm-2" for="restaurant_contact">Contact No.:</label>
+				<div class="col-sm-10">
+					<input type="text" class="form-control" id="restaurant_contact" placeholder="Contact Details"
+						name="restaurant_contact">
+				</div>
+			</div>
+			<br />
+			<div class="form-group row">
+				<label class="control-label col-sm-2" for="restaurant_address">Restaurant Address:</label>
+				<div class="col-sm-10">
+					<input type="text" class="form-control" id="restaurant_address" placeholder="Restaurant Address"
+						name="restaurant_address">
+				</div>
+			</div>
+			<br />
+			<div class="form-group">
+				<div class="col-sm">
+					<button type="submit" class="btn btn-success">Add</button>
+				</div>
+			</div>
+		</form>
+		<br />
+		<h3>Existing restaurants</h3>
+		{% if messages %}
+        <ul class="messages">
+            {% for message in messages %}
+            <li {% if message.tags %} class="{{ message.tags }}"{% endif %} style="list-style: none;">{{ message }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+		<div class="row g-0">
+			{% for r in restaurants %}
+			<div class="col-md-12 row mb-3">
+				<div class="col-md-10 d-flex justify-content-start">{{ r.name }}</div>
+				<div class="col-md-2 d-flex justify-content-end">
+					<form action='/remove_restaurant' method='GET'>
+					<input type="hidden" name="name" value="{{ r.name }}"></input>
+					<button type='submit' class="btn btn-danger">Remove</button> 
+					</form>
+				</div>
+			</div>
+			<hr />
+			{% endfor %}
+		</table>
+	</div>
+</body>
+
+<!-- MDB JavaScript -->
+<script type="text/javascript" src="{% static 'adminconsole/static/adminconsole/js/mdb.min.js' %}"></script>
+<!-- Custom scripts -->
+<script type="text/javascript">
+
+</script>
+
+</html>

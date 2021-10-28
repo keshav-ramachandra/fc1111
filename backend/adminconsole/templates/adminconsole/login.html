@@ -28,16 +28,18 @@
 		<form class="form-horizontal" method="POST" action="/admin_login">
 			{% csrf_token %}
 			<div class="form-group row">
-				<label class="control-label col-sm-2" for="email">Email:</label>
+				<label class="control-label col-sm-2" for="email">Email*:</label>
+
 				<div class="col-sm-10">
-					<input type="email" class="form-control" id="email" placeholder="Enter email" name="email">
+					<input type="email" class="form-control" id="email" placeholder="Enter email" name="email" value="{{ user_email }}" required/>
 				</div>
+				
 			</div>
 			<br />
 			<div class="form-group row">
-				<label class="control-label col-sm-2" for="pwd">Password:</label>
+				<label class="control-label col-sm-2" for="pwd">Password*:</label>
 				<div class="col-sm-10">
-					<input type="password" class="form-control" id="pwd" placeholder="Enter password" name="pwd">
+					<input type="password" class="form-control" id="pwd" placeholder="Enter password" name="pwd" required>
 				</div>
 			</div>
 			<br />
@@ -48,9 +50,9 @@
 			</div>
 		</form>
 		<br />
-		<footer>
+		<!-- <footer>
 			<a href="/admin_register">Register here</a>
-		</footer>
+		</footer> -->
 	</div>
 </body>
 <script type="text/javascript" src="% static 'adminconsole/static/adminconsole/js/mdb.min.js' %"></script>

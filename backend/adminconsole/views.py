@@ -18,6 +18,10 @@ import random
 
 from faker import Faker
 
+FOOD_ID_FLAG = 0
+RESTAURANT_ID_FLAG = 0
+
+
 def index(request):
     return render(request, 'adminconsole/login.html', {})
 
@@ -38,6 +42,7 @@ def admin_login(request):
         email = request.POST.get('email')
         password = request.POST.get('pwd')
         user = User.objects.filter(Q(email=email, is_admin=1))
+        ctx = {'user_email': email}
         if user:
             serializer = UserSerializer(user, many=True)
             ser_user = dict(serializer.data[0])
@@ -52,14 +57,15 @@ def admin_login(request):
                 # print(request.user.is_authenticated)
                 return redirect('/admin_home')
             else:
-                messages.error(request, "Invalid Credentials!")
+                messages.error(request, "Invalid Password!")
                 # print('password didnt match')
-                return redirect('/')
+                return render(request, "adminconsole/login.html", ctx)
         else:
-            messages.error(request, 'Incorrect Email')
-            return redirect('/')
+            messages.error(request, 'Email not found')
+            return render(request, "adminconsole/login.html",  ctx)
     # return redirect('admin_login')
     return render(request, "adminconsole/login.html", {})
+    
 
 # Code for Dummy Users Creation
 fake = Faker()
@@ -198,7 +204,17 @@ def admin_register(request):
     else:
         return render(request, 'adminconsole/signup.html', {})
 
+def edit_restaurant_details(request):
+    rt_id = request.GET['restaurant_id']
+    global RESTAURANT_ID_FLAG
+    if RESTAURANT_ID_FLAG == 0:
+        RESTAURANT_ID_FLAG = rt_id
+    rt_new = Restaurant.objects.filter(restaurant_id=RESTAURANT_ID_FLAG).first()
+    ctx = {'resto_new' : rt_new}
+    return render(request, "adminconsole/upload_restaurant.html", ctx)
+
 def add_restaurant(request):
+    global RESTAURANT_ID_FLAG
     if request.session['user']:
         if request.method == 'POST':
             rest_data = {}
@@ -206,59 +222,103 @@ def add_restaurant(request):
             rest_data['website'] = request.POST.get('restaurant_url')
             rest_data['contact'] = request.POST.get('restaurant_contact')
             rest_data['address'] = request.POST.get('restaurant_address')
-            rest_serializer = RestaurantSerializer(data=rest_data)
-            if rest_serializer.is_valid():
-                try:
-                    rest = Restaurant.objects.create(
-                        name = rest_data['name'],
-                        website = rest_data['website'],
-                        contact = rest_data['contact'],
-                        address = rest_data['address']
-                        )
-                    if rest:
-                        messages.info(request, 'Restaurant added')
-                        return redirect('/add_restaurant')
-                    else:
-                        messages.info(request, 'Error adding new restaurant')
-                        return redirect('/add_restaurant')
-                except:
-                    # write an elegant way to inform user that error has occured
-                    messages.info(request, 'Error in adding restaurant')
-                    return redirect('/add_restaurant')
-            else:
-                messages.info(request, 'Invalid Entry')
+            ctx = {'resto_new' : rest_data}
+            if RESTAURANT_ID_FLAG != 0:
+                r = Restaurant.objects.filter(restaurant_id=RESTAURANT_ID_FLAG).first()
+                r.name = rest_data['name']
+                r.website = rest_data['website']
+                r.contact = rest_data['contact']
+                r.address = rest_data['address']
+                rest_serializer = RestaurantSerializer(data=rest_data)
+                if rest_serializer.is_valid():
+                    r.save()
+                else:
+                    messages.error(request, 'Invalid Restaurant detected')
+                    return render(request, "adminconsole/upload_restaurant.html", ctx)
+                RESTAURANT_ID_FLAG = 0
+                messages.success(request, 'Restaurant details was modified')
                 return redirect('/add_restaurant')
+            else:
+                rest_serializer = RestaurantSerializer(data=rest_data)
+                if rest_serializer.is_valid():
+                    # print("rest_serializer valid")
+                    try:
+                        rest = Restaurant.objects.create(
+                            name = rest_data['name'],
+                            website = rest_data['website'],
+                            contact = rest_data['contact'],
+                            address = rest_data['address'],
+                            )
+                        if rest:
+                            messages.info(request, 'Restaurant added')
+                            return redirect('/add_restaurant')
+                        else:
+                            messages.info(request, 'Error adding new restaurant')
+                            return render(request, "adminconsole/upload_restaurant.html", ctx)
+                    except:
+                        # write an elegant way to inform user that error has occured
+                        messages.info(request, 'Error in adding restaurant')
+                        return render(request, "adminconsole/upload_restaurant.html", ctx)
+                else:
+                    # print("rest_serializer invalid")
+                    messages.info(request, 'Invalid Entry')
+                    return render(request, "adminconsole/upload_restaurant.html", ctx)
         existing_rest = Restaurant.objects.all()
         return render(request, "adminconsole/upload_restaurant.html", {'restaurants': existing_rest})
     else:
         messages.error(request, 'You are not signed in!')
         return redirect('/')
-    
+
+ 
+def edit_food_tag(request):
+    ftid = request.GET['food_type_id']
+    global FOOD_ID_FLAG
+    if FOOD_ID_FLAG == 0:
+        FOOD_ID_FLAG = ftid
+    ft_new = FoodType.objects.filter(food_type_id=ftid).first()
+    ctx = {'food_type_new': ft_new}
+    return render(request, "adminconsole/upload_food.html", ctx)
 
 def add_food_type(request):
+    global FOOD_ID_FLAG
     if request.session['user']:
         if request.method == 'POST':
             food_type = {}
             food_type['food_type'] = request.POST.get('food_tag')
-            ft_serializer = FoodTypeSerializer(data=food_type)
-            if ft_serializer.is_valid():
-                try:
-                    ft = FoodType.objects.create(
-                        food_type = food_type['food_type'],
-                        )
-                    if ft:
-                        messages.success(request, 'New food type added')
-                        return redirect('/add_food_type')
-                    else:
-                        messages.info(request, 'Food type was not added')
-                        return redirect('/add_food_type')
-                except:
-                    # write an elegant way to inform user that error has occured
-                    messages.info(request, 'Duplicate food type detected')
+            # print(FOOD_ID_FLAG, "##############################")
+            if FOOD_ID_FLAG != 0:
+                f = FoodType.objects.filter(food_type_id = FOOD_ID_FLAG).first()
+                f.food_type = food_type['food_type']
+                ft_serializer = FoodTypeSerializer(data = food_type)
+                if ft_serializer.is_valid():
+                    f.save()
+                else:
+                    messages.error(request, 'Invalid Food type detected')
                     return redirect('/add_food_type')
-            else:
-                messages.info(request, 'Invalid food type detected')
+                FOOD_ID_FLAG = 0
+                # print(FOOD_ID_FLAG)
+                messages.success(request, 'Food type was modified')
                 return redirect('/add_food_type')
+            else: 
+                ft_serializer = FoodTypeSerializer(data=food_type)
+                if ft_serializer.is_valid():
+                    try:    
+                        ft = FoodType.objects.create(
+                            food_type = food_type['food_type'],
+                            )
+                        if ft:
+                            messages.success(request, 'New food type added')
+                            return redirect('/add_food_type')
+                        else:
+                            messages.info(request, 'Duplicate type was not added')
+                            return redirect('/add_food_type')
+                    except:
+                        # write an elegant way to inform user that error has occured
+                        messages.info(request, 'Invalid food type detected')
+                        return redirect('/add_food_type')
+                else:
+                    messages.info(request, 'Invalid food type detected')
+                    return redirect('/add_food_type')
 
         existing_tags = FoodType.objects.all()
         return render(request, "adminconsole/upload_food.html", {'tags': existing_tags})
@@ -268,7 +328,7 @@ def add_food_type(request):
 
 def approve_images(request):
     if request.session['user']:
-        user_posts = Post.objects.filter(approve_status=False)
+        user_posts = Post.objects.filter(approve_status=0)
         # ft_serializer = FoodTypeSerializer(data=food_type)
         if user_posts:
             current_posts = user_posts
@@ -280,23 +340,22 @@ def approve_images(request):
         messages.error(request, 'You are not signed in!')
         return redirect('/')
 
-# def approve_images(request):
-#     return render(request, "adminconsole/approve_images.html", {})
-
 def remove_tag(request):
-    ft = request.GET['food_type']
+    fid = request.GET['food_type_id']
     try:
-        fd = FoodType.objects.filter(food_type=ft).first().delete()
+        FoodType.objects.filter(food_type_id=fid).first().delete()
         messages.success(request, 'Food type was deleted')
         return redirect('/add_food_type')
     except:
         messages.info(request, 'Food type was not deleted')
         return redirect('/add_food_type')
 
+
+
 def remove_restaurant(request):
-    ft = request.GET['name']
+    rid = request.GET['restaurant_id']
     try:
-        fd = Restaurant.objects.filter(name=ft).first().delete()
+        Restaurant.objects.filter(restaurant_id=rid).first().delete()
         messages.success(request, 'Restaurant was deleted')
         return redirect('/add_restaurant')
     except:
@@ -310,7 +369,7 @@ def approve_post(request):
             print('before fetching specific post from db')
             post = Post.objects.filter(post_id=post_id).first()
             print('before updating post_status')
-            post.approve_status = True
+            post.approve_status = 1
             print('before saving that post')
             post.save()
             print('after post save')
@@ -326,10 +385,27 @@ def approve_post(request):
 def discard_post(request):
     post_id = request.GET['post_id']
     try:
-        Post.objects.filter(post_id=post_id).first()
-        Post.objects.filter(post_id=post_id).update(approve_status=False)
-        Post.save()
+        post = Post.objects.filter(post_id=post_id).first()
+        post.approve_status = -1
+        # print("-1 kiya idhar")
+        # Post.objects.filter(post_id=post_id).update(approve_status=-1)
+        # print('userid dhundre iske baad')
+        user_id = post.user_id_id
+        # print('userid mila idhar')
+        user1 = User.objects.filter(user_id = user_id).first()
+        user_email = user1.email
+        # print(user_email)
+        # print('user email dhundliya idhar')
+        # message = request.GET['discard_reason']
+        message = request.GET['discard_reason']
+        print(message)
+        # print('user ko email bhejre iske baad')
+        send_mail(subject='Post discarded due to inappropriate content',message=message,from_email=settings.EMAIL_HOST_USER,recipient_list=[user_email])
+        print('before saving post')
+        post.save()
+        print('after saving post')
         messages.success(request, 'Post Discarded')
+        return redirect('/approve_images')
     except:
         messages.info(request, 'Post could not be Discarded')
         return redirect('/approve_images')

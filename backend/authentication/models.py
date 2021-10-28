@@ -15,7 +15,7 @@ class User(models.Model):
     password = models.CharField(max_length=255)
     phone_number = models.CharField(max_length=50, blank=True)
     dob = models.DateField(default=date(2000,1,1), blank=True)
-    profile_photo_url = models.URLField(max_length = 200, blank=True)
+    profile_photo_url = models.TextField(null=True, blank=True)
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)
     last_login = models.DateTimeField(default=datetime.now)

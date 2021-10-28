@@ -27,7 +27,7 @@ def register(request):
 	user_data = JSONParser().parse(request)
 	user_serializer = UserSerializer(data=user_data)
 	if user_serializer.is_valid():
-		user = User.objects.create(user_name = user_data['user_name'],first_name = user_data['first_name'],last_name = user_data['last_name'],email = user_data['email'],password = make_password(user_data['password']),phone_number = user_data['phone_number'],dob = user_data['dob'],last_login = datetime.now())
+		user = User.objects.create(user_name = user_data['user_name'],first_name = user_data['first_name'],last_name = user_data['last_name'],email = user_data['email'],password = make_password(user_data['password']),phone_number = user_data['phone_number'],dob = user_data['dob'],last_login = datetime.now(),profile_photo_url = user_data['profile_photo_url'],)
 		user.save()
 		send_mail(subject='Food Court Registration',message='Thank you for Registering',from_email=settings.EMAIL_HOST_USER,recipient_list=[user_data['email']])
 		return HttpResponse("success",status=status.HTTP_201_CREATED)
@@ -47,7 +47,7 @@ def postImage(request):
 @csrf_exempt
 def get_user(request):
 	user_email = request.GET['user_email']
-	# print(user_email)
+	print(user_email)
 	users = User.objects.filter(Q(email=user_email))
 	# print(users)
 	user_detail={}

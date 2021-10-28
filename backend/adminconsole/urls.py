@@ -23,5 +23,10 @@ urlpatterns = [
     path('discard_post', admin_views.discard_post, name='discard_post'),
     path('dummy_data_generator_user', admin_views.dummy_data_generator_user, name='dummy_data_generator_user'),
     path('dummy_data_generator_food', admin_views.dummy_data_generator_food, name='dummy_data_generator_food'),
+    path('dummy_data_generator_user/', admin_views.dummy_data_generator_user, name='dummy_data_generator_user'),
+    path('dummy_data_generator_food/', admin_views.dummy_data_generator_food, name='dummy_data_generator_food'),
     path('dummy_data_generator_restaurant', admin_views.dummy_data_generator_restaurant, name='dummy_data_generator_restaurant'),
+    path('edit_food_tag', admin_views.edit_food_tag, name='edit_food_tag'),
+    path('edit_restaurant_details', admin_views.edit_restaurant_details, name='edit_restaurant_details'),
+    
 ]

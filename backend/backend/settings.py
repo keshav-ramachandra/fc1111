@@ -88,8 +88,8 @@ DATABASES = {
             'ENGINE': 'django.db.backends.mysql',
             'NAME': 'foodcourt',
             'USER': 'root',
-            'PASSWORD': 'mysql_root',
-            # 'PASSWORD': 'admin',
+            # 'PASSWORD': 'mysql_root',
+            'PASSWORD': 'admin',
             'HOST': 'localhost',
             'PORT': '3306',
         }
